@@ -1,36 +1,27 @@
-function correctLength(string, length) {
-  return string.length <= length;
-}
+/*
+'8:00' - начало рабочего дня
+'17:30' - конец рабочего дня
+'14:00' - начало встречи
+90 - продолжительность встречи в минутах
+*/
+const getMin = (time) => {
+  const MIN_IN_HOUR = 60;
+  const [hour, min] = time.split(':').map((element) => Number(element));
+  return hour * MIN_IN_HOUR + min;
+};
 
-function polindrom(string) {
-  string = string.replaceAll(' ','').toLowerCase();
-  let reverseString = '';
-  for (let i = string.length - 1; i >= 0; i--) {
-    reverseString += string[i];
-  }
-  return reverseString === string;
-}
+const beOnTime = (startTime, endTime, currentTime, lenTime) => {
+  const startTimeMin = getMin(startTime);
+  const endTimeMin = getMin(endTime);
+  const currentTimeMin = getMin(currentTime);
+  // console.log(startTimeMin, endTimeMin, currentTimeMin, lenTime);
 
-function digitInString(string) {
-  string = string.toString().replaceAll(' ','');
-  let newString = '';
-  for (let i = 0; i < string.length; i++) {
-    if (!isNaN(string[i])) {
-      newString += string[i];
-    }
-  }
-  return newString ? newString : NaN;
-}
+  return (startTimeMin <= currentTimeMin) && (endTimeMin >= currentTimeMin + lenTime);
+};
 
-correctLength('проверяемая строка', 20);
-correctLength('проверяемая строка', 18);
-correctLength('проверяемая строка', 10);
-polindrom('топот');
-polindrom('Довод');
-polindrom('Кекс');
-polindrom('Лёша на полке клопа нашёл ');
-digitInString('2023 год');
-digitInString('ECMAScript 2022');
-digitInString('1 кефир,0.5 батона');
-digitInString('агент 007');
-digitInString('а я томат');
+beOnTime('08:00', '17:30', '14:00', 90);
+// console.log(beOnTime('08:00', '17:30', '14:00', 90)); // true
+// console.log(beOnTime('8:0', '10:0', '8:0', 120));     // true
+// console.log(beOnTime('08:00', '14:30', '14:00', 90)); // false
+// console.log(beOnTime('14:00', '17:30', '08:0', 90));  // false
+// console.log(beOnTime('8:00', '17:30', '08:00', 900)); // false
