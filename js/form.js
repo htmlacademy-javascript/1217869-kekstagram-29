@@ -1,6 +1,7 @@
 //скрытие отображение картинки
 const close = () => {
   const changeImg = document.querySelector('.img-upload__overlay');
+  const form = document.querySelector('.img-upload__form');
   const file = document.querySelector('#upload-file');
   if (changeImg.classList.contains('hidden')) {
     return;
@@ -9,6 +10,8 @@ const close = () => {
   changeImg.classList.add('hidden');
   document.body.classList.remove('modal-open');
   file.value = '';
+  form.querySelector('.text__hashtags').value = '';
+  form.querySelector('.text__description').value = '';
 };
 
 //скрытие отображение картинки по клику на пустую область

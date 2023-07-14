@@ -98,5 +98,3 @@ const showFullWindowImg = (AllPhotos) => {
 };
 
 export {showFullWindowImg};
-
-

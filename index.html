@@ -31,7 +31,7 @@
       <section class="img-upload">
         <div class="img-upload__wrapper">
           <h2 class="img-upload__title  visually-hidden">Загрузка фотографии</h2>
-          <form class="img-upload__form" id="upload-select-image" autocomplete="off">
+          <form class="img-upload__form" id="upload-select-image" autocomplete="off" method="post" action="index.html" enctype="multipart/form-data">
 
             <!-- Изначальное состояние поля для загрузки изображения -->
             <fieldset class="img-upload__start">
@@ -229,6 +229,5 @@
   </template>
 
   <script src="js/main.js" type="module"></script>
-  <script src="js/form.js" type="module"></script>
 </body>
 </html>
