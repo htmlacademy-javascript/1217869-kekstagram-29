@@ -1,4 +1,4 @@
-let p = {comments:''};
+let photoDefault = {comments:''};
 
 const countAdd = (count) => {
   const countListComment = Number(document.querySelector('.comments-count').textContent);
@@ -12,7 +12,7 @@ const countAdd = (count) => {
 };
 
 const renderComments = () => {
-  const listComments = p.comments;
+  const listComments = photoDefault.comments;
   const countListComments = Number(document.querySelector('.comments-count').textContent);
   const socialComments = document.querySelector('.social__comments');
   const count = countAdd(socialComments.children.length);
@@ -38,8 +38,8 @@ const renderComments = () => {
 
 const renderComment = (photo) => {
   //дозагрузка комментов
-  p = photo;
-  renderComments(photo);
+  photoDefault = photo;
+  renderComments();
   const loader = document.querySelector('.comments-loader');
   loader.removeEventListener('click', renderComments);
   loader.addEventListener('click', renderComments);

@@ -1,6 +1,15 @@
 import {sendData} from './data.js';
 
 const form = document.querySelector('.img-upload__form');
+const buttonSubmit = document.querySelector('.img-upload__submit');
+let sendForm = false;
+
+const pristine = new Pristine(form, {
+  classTo: 'img-upload__text',
+  errorTextParent: 'img-upload__text',
+  errorTextTag: 'div',
+  errorTextClass: 'error-validate'
+});
 
 const close = () => {
   const changeImg = document.querySelector('.img-upload__overlay');
@@ -22,15 +31,31 @@ const close = () => {
   image.style.filter = 'none';
 
   const slider = document.querySelector('.effect-level__slider');
-  slider.noUiSlider.set(0);
+  slider.noUiSlider.set(1);
 
-  const buttonSubmit = document.querySelector('.img-upload__submit');
-  buttonSubmit.disabled = true;
+  buttonSubmit.disabled = false;
+  pristine.reset();
+
+  const effectNone = document.querySelector('#effect-none');
+  effectNone.checked = true;
 };
 
 //скрытие отображение картинки по клику на пустую область
 const closeImg = document.querySelector('.img-upload__overlay');
 closeImg.addEventListener('click', (evt) => {
+  if (document.querySelector('.error') !== null) {
+    const sectionError = document.querySelector('.error');
+    document.querySelector('.pictures').removeChild(sectionError);
+    return;
+  }
+
+  if (document.querySelector('.success') !== null) {
+    const sectionError = document.querySelector('.success');
+    document.querySelector('.pictures').removeChild(sectionError);
+    close();
+    return;
+  }
+
   if (evt.target === closeImg) {
     close();
   }
@@ -46,17 +71,27 @@ closeButton.addEventListener('click', () => {
 document.addEventListener('keydown', (evt) => {
   const noFocus = (form.querySelector('.text__hashtags') !== document.activeElement) && (form.querySelector('.text__description') !== document.activeElement);
 
+  if (document.querySelector('.error') !== null) {
+    evt.preventDefault();
+    const sectionError = document.querySelector('.error');
+    document.querySelector('.pictures').removeChild(sectionError);
+    buttonSubmit.disabled = false;
+    return;
+  }
+
+  if (document.querySelector('.success') !== null) {
+    evt.preventDefault();
+    const sectionError = document.querySelector('.success');
+    document.querySelector('.pictures').removeChild(sectionError);
+    buttonSubmit.disabled = true;
+    close();
+    return;
+  }
+
   if ((evt.key === 'Escape') && (noFocus)) {
     evt.preventDefault();
     close();
   }
-});
-
-const pristine = new Pristine(form, {
-  classTo: 'img-upload__text',
-  errorTextParent: 'img-upload__text',
-  errorTextTag: 'div',
-  errorTextClass: 'error-validate'
 });
 
 const validateForm = () => {
@@ -98,32 +133,66 @@ const validateForm = () => {
 const showOkMessange = () => {
   const ok = document.querySelector('#success').content.cloneNode(true);
   document.querySelector('.pictures').appendChild(ok);
-  const okButton = document.querySelector('.success__button');
-  okButton.addEventListener('click', () => {
-    const sectionError = document.querySelector('.success');
-    document.querySelector('.pictures').removeChild(sectionError);
+  const sectionError = document.querySelector('.success');
+  buttonSubmit.disabled = true;
+
+  sectionError.addEventListener('click', (evt) => {
+    const successInner = document.querySelector('.success__inner');
+
+    if (evt.target !== successInner) {
+      buttonSubmit.disabled = false;
+      document.querySelector('.pictures').removeChild(sectionError);
+    }
   });
 };
 
 const showErrorMessange = () => {
   const error = document.querySelector('#error').content.cloneNode(true);
   document.querySelector('.pictures').appendChild(error);
-  const errorButton = document.querySelector('.error__button');
-  errorButton.addEventListener('click', () => {
-    const sectionError = document.querySelector('.error');
-    document.querySelector('.pictures').removeChild(sectionError);
+  const sectionError = document.querySelector('.error');
+  sendForm = false;
+  buttonSubmit.disabled = false;
+
+  sectionError.addEventListener('click', (evt) => {
+    const errorInner = document.querySelector('.error__inner');
+
+    if (evt.target !== errorInner) {
+      document.querySelector('.pictures').removeChild(sectionError);
+    }
   });
 };
 
 const setOnFormSubmit = () => {
-  form.addEventListener('submit', (evt) => {
+  buttonSubmit.addEventListener('click', (evt) => {
     evt.preventDefault();
+    buttonSubmit.disabled = true;
+    sendForm = true;
 
     if (pristine.validate()) {
-      pristine.reset();
       const data = new FormData(form);
-      showOkMessange();
-      sendData(data).then(close).catch(showErrorMessange);
+      sendData(data)
+        .then(() => {
+          showOkMessange();
+          close();
+        })
+        .catch(showErrorMessange);
+    }
+  });
+
+  form.addEventListener('submit', (evt) => {
+    evt.preventDefault();
+    buttonSubmit.disabled = true;
+
+    if (pristine.validate()) {
+      const data = new FormData(form);
+      buttonSubmit.disabled = false;
+      pristine.reset();
+      sendData(data)
+        .then(() => {
+          showOkMessange();
+          close();
+        })
+        .catch(showErrorMessange);
     }
   });
 };
@@ -132,7 +201,6 @@ const loadFormImg = () => {
   const file = document.querySelector('#upload-file');
 
   file.addEventListener('change', () => {
-    const buttonSubmit = document.querySelector('.img-upload__submit');
     buttonSubmit.disabled = true;
     //отобразим картинку если jpg png
     if (file.files[0].name.endsWith('jpg') || file.files[0].name.endsWith('png')) {
@@ -161,17 +229,18 @@ const scaleImage = () => {
   const zoomImg = (direction) => {
     const image = document.querySelector('.img-upload__preview img');
     const digitValue = Number(buttonValue.value.replace('%',''));
+    let zoomValue = direction;
 
-    if ((digitValue === 25) && (direction < 0)) {
-      direction = 0;
+    if ((digitValue === 25) && (zoomValue < 0)) {
+      zoomValue = 0;
     }
 
-    if ((digitValue === 100) && (direction > 0)) {
-      direction = 0;
+    if ((digitValue === 100) && (zoomValue > 0)) {
+      zoomValue = 0;
     }
 
-    buttonValue.value = `${digitValue + direction}%`;
-    image.style.transform = `scale(${(digitValue + direction) / 100})`;
+    buttonValue.value = `${digitValue + zoomValue}%`;
+    image.style.transform = `scale(${(digitValue + zoomValue) / 100})`;
   };
 
   buttonSmall.addEventListener('click', () => zoomImg(-25));
@@ -193,12 +262,51 @@ const changeFilterEffect = () => {
   noUiSlider.create(slider, {
     range: {
       min: 0,
-      max: 100,
+      max: 1,
     },
-    start: 0,
-    step: 10,
+    start: 1,
+    step: 0.10,
     connect: 'lower',
   });
+
+  const settingsSlider = {
+    'default': {
+      range: {
+        min: 0,
+        max: 1,
+      },
+      start: 1,
+      step: 0.10,
+      connect: 'lower',
+    },
+    'invert': {
+      range: {
+        min: 0,
+        max: 1,
+      },
+      start: 1,
+      step: 0.01,
+      connect: 'lower',
+    },
+    'phobos': {
+      range: {
+        min: 0,
+        max: 3,
+      },
+      start: 3,
+      step: 0.1,
+      connect: 'lower',
+    },
+    'heat': {
+      range: {
+        min: 1,
+        max: 3,
+      },
+      start: 3,
+      step: 0.1,
+      connect: 'lower',
+    },
+  };
 
   const setValueEffect = () => {
     const value = sliderValue.value;
@@ -207,23 +315,23 @@ const changeFilterEffect = () => {
 
     switch (true) {
       case (effectChrome.checked) :
-        image.style.filter = `grayscale(${value / 100})`;
+        image.style.filter = `grayscale(${value})`;
         break;
       case (effectSepia.checked) :
-        image.style.filter = `sepia(${value / 100})`;
+        image.style.filter = `sepia(${value})`;
         break;
       case (effectMarvin.checked) :
-        image.style.filter = `invert(${value / 100})`;
+        image.style.filter = `invert(${value})`;
         break;
       case (effectPhobos.checked) :
-        image.style.filter = `blur(${value * 3 / 100}px)`;
+        image.style.filter = `blur(${value}px)`;
         break;
       case (effectHeat.checked) :
-        image.style.filter = `brightness(${1 + value * 2 / 100})`;
+        image.style.filter = `brightness(${value})`;
         break;
       default:
         image.style.filter = 'none';
-        sliderValue.value = 0;
+        sliderValue.value = 1;
         fieldSlider.classList.add('hidden');
         break;
     }
@@ -231,14 +339,60 @@ const changeFilterEffect = () => {
 
   slider.noUiSlider.on('update', () => {
     sliderValue.value = slider.noUiSlider.get();
+    sliderValue.setAttribute('value', slider.noUiSlider.get());
     setValueEffect();
   });
 
   effectsList.addEventListener('click', () => {
-    sliderValue.value = 0;
-    slider.noUiSlider.set(0);
-    setValueEffect();
+    sliderValue.value = 1;
+    slider.noUiSlider.set(1);
+
+    switch (true) {
+      case (effectChrome.checked) :
+        slider.noUiSlider.updateOptions(settingsSlider.default);
+        break;
+      case (effectSepia.checked) :
+        slider.noUiSlider.updateOptions(settingsSlider.default);
+        break;
+      case (effectMarvin.checked) :
+        slider.noUiSlider.updateOptions(settingsSlider.invert);
+        break;
+      case (effectPhobos.checked) :
+        slider.noUiSlider.updateOptions(settingsSlider.phobos);
+        slider.noUiSlider.set(3);
+        break;
+      case (effectHeat.checked) :
+        slider.noUiSlider.updateOptions(settingsSlider.heat);
+        slider.noUiSlider.set(3);
+        break;
+      default:
+        slider.noUiSlider.updateOptions(settingsSlider.default);
+        break;
+    }
   });
 };
+
+const textField = document.querySelector('.img-upload__text');
+
+const observer = new MutationObserver((mutationRecords) => {
+  const element = mutationRecords[0];
+
+  if (element.addedNodes.length !== 0 && element.addedNodes[0].textContent !== '') {
+    buttonSubmit.disabled = true;
+  } else {
+    buttonSubmit.disabled = false;
+  }
+
+  if (sendForm) {
+    buttonSubmit.disabled = true;
+  }
+
+});
+
+observer.observe(textField, {
+  childList: true, // наблюдать за непосредственными детьми
+  subtree: true, // и более глубокими потомками
+  characterDataOldValue: true // передавать старое значение в колбэк
+});
 
 export {validateForm, scaleImage, loadFormImg, changeFilterEffect, setOnFormSubmit};
