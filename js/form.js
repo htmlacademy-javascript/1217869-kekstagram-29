@@ -154,7 +154,9 @@ const setOnFormSubmit = () => {
           close();
         })
         .catch(showErrorMessange)
-        .finally(buttonSubmit.disabled = false);
+        .finally(() => {
+          buttonSubmit.disabled = false;
+        });
     }
   });
 };
