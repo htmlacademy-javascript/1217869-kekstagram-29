@@ -1,55 +1,56 @@
 import {createPhotos, deletePhotos} from './picture.js';
 import {getRandomArray, debounce} from './util.js';
 
-const filterMenu = (allPhotos = 0) => {
+const filter = (allPhotos = [], evt) => {
+  const idPhoto = evt.id;
+
   deletePhotos();
-  createPhotos(allPhotos);
+  let newAllPhotos = allPhotos;
+
+  switch (idPhoto) {
+    case ('filter-random'):
+      newAllPhotos = getRandomArray(allPhotos, 10);
+      break;
+    case ('filter-discussed'): {
+      const compareDiscussedCount = (photo1, photo2) => photo2.comments.length - photo1.comments.length;
+      newAllPhotos = allPhotos.slice().sort(compareDiscussedCount);
+      break;
+    }
+  }
+
+  createPhotos(newAllPhotos);
+};
+
+const onClickButton = (evt) => {
+  const imgFilterButtons = document.querySelectorAll('.img-filters__button');
+  const imgFilters = document.querySelector('.img-filters');
+
+  if (evt.target !== imgFilters) {
+    imgFilterButtons.forEach((element) => {
+      element.classList.remove('img-filters__button--active');
+    });
+
+    evt.target.classList.add('img-filters__button--active');
+  }
+};
+
+const filterMenu = (allPhotos) => {
+  const filterPhotos = (e) => filter(allPhotos, e);
+
   const imgFilters = document.querySelector('.img-filters');
   if (allPhotos.length !== 0) {
     imgFilters.classList.remove('img-filters--inactive');
   }
 
-  const filterRandom = (photos) => {
-    deletePhotos();
-    const newAllPhotos = getRandomArray(photos, 10);
-    createPhotos(newAllPhotos);
-  };
+  const filterDefault = document.querySelector('#filter-default');
+  const filterRandom = document.querySelector('#filter-random');
+  const filterDiscussed = document.querySelector('#filter-discussed');
 
-  const filterDiscussed = (photos) => {
-    deletePhotos();
-    const compareDiscussedCount = (photo1, photo2) => photo2.comments.length - photo1.comments.length;
-    const newAllPhotos = photos.slice().sort(compareDiscussedCount);
-    createPhotos(newAllPhotos);
-  };
-
-  const filterDefault = (photos) => {
-    deletePhotos();
-    createPhotos(photos);
-  };
-
-  const elementsMenu = document.querySelectorAll('.img-filters__button');
-  const chooseElementMenu = () => {
-    elementsMenu.forEach((element) => {
-      element.addEventListener('click', () => {
-        elementsMenu.forEach((e) => {
-          e.classList.remove('img-filters__button--active');
-        });
-        element.classList.add('img-filters__button--active');
-      });
-
-      element.addEventListener('click', debounce(() => {
-        switch (element.id) {
-          case ('filter-random'):
-            return filterRandom(allPhotos);
-          case ('filter-discussed'):
-            return filterDiscussed(allPhotos);
-          default :
-            return filterDefault(allPhotos);
-        }
-      }));
-    });
-  };
-  chooseElementMenu();
+  filterPhotos(document.querySelector('#filter-default'));
+  filterDefault.addEventListener('click', debounce((e) => filterPhotos(e.srcElement)));
+  filterRandom.addEventListener('click', debounce((e) => filterPhotos(e.srcElement)));
+  filterDiscussed.addEventListener('click', debounce((e) => filterPhotos(e.srcElement)));
+  imgFilters.addEventListener('click', (e) => onClickButton(e));
 };
 
 export {filterMenu};
