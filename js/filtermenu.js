@@ -1,6 +1,14 @@
 import {createPhotos, deletePhotos} from './picture.js';
 import {getRandomArray, debounce} from './util.js';
 
+const COUNT_IMAGES_SHOW = 10;
+
+const imgFilterButtons = document.querySelectorAll('.img-filters__button');
+const imgFilters = document.querySelector('.img-filters');
+const filterDefault = document.querySelector('#filter-default');
+const filterRandom = document.querySelector('#filter-random');
+const filterDiscussed = document.querySelector('#filter-discussed');
+
 const filter = (allPhotos = [], evt) => {
   const idPhoto = evt.id;
 
@@ -9,7 +17,7 @@ const filter = (allPhotos = [], evt) => {
 
   switch (idPhoto) {
     case ('filter-random'):
-      newAllPhotos = getRandomArray(allPhotos, 10);
+      newAllPhotos = getRandomArray(allPhotos, COUNT_IMAGES_SHOW);
       break;
     case ('filter-discussed'): {
       const compareDiscussedCount = (photo1, photo2) => photo2.comments.length - photo1.comments.length;
@@ -21,10 +29,7 @@ const filter = (allPhotos = [], evt) => {
   createPhotos(newAllPhotos);
 };
 
-const onClickButton = (evt) => {
-  const imgFilterButtons = document.querySelectorAll('.img-filters__button');
-  const imgFilters = document.querySelector('.img-filters');
-
+const onButtonClick = (evt) => {
   if (evt.target !== imgFilters) {
     imgFilterButtons.forEach((element) => {
       element.classList.remove('img-filters__button--active');
@@ -37,20 +42,15 @@ const onClickButton = (evt) => {
 const filterMenu = (allPhotos) => {
   const filterPhotos = (e) => filter(allPhotos, e);
 
-  const imgFilters = document.querySelector('.img-filters');
   if (allPhotos.length !== 0) {
     imgFilters.classList.remove('img-filters--inactive');
   }
 
-  const filterDefault = document.querySelector('#filter-default');
-  const filterRandom = document.querySelector('#filter-random');
-  const filterDiscussed = document.querySelector('#filter-discussed');
-
-  filterPhotos(document.querySelector('#filter-default'));
+  filterPhotos(filterDefault);
   filterDefault.addEventListener('click', debounce((e) => filterPhotos(e.srcElement)));
   filterRandom.addEventListener('click', debounce((e) => filterPhotos(e.srcElement)));
   filterDiscussed.addEventListener('click', debounce((e) => filterPhotos(e.srcElement)));
-  imgFilters.addEventListener('click', (e) => onClickButton(e));
+  imgFilters.addEventListener('click', (e) => onButtonClick(e));
 };
 
 export {filterMenu};

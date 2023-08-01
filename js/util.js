@@ -1,21 +1,21 @@
-//случайное целое
 const getRandomNumber = (left, right) => Math.trunc(Math.random() * (right + 1 - left) + left);
 
-//случайное неповторяющееся массив из N элементов
-const getRandomArray = (array, count) => {
-  const newArray = [];
-  const idArray = array.slice().map((element) => element.id);
+const TIME_DELAY = 500;
+
+const getRandomArray = (arrays, count) => {
+  const newArrays = [];
+  const idArrays = arrays.slice().map((element) => element.id);
 
   for (let i = 0; i < count; i++) {
-    const choice = getRandomNumber(0, array.length - i - 1);
-    newArray.push(array[idArray[choice]]);
-    idArray.splice(choice, 1);
+    const choice = getRandomNumber(0, arrays.length - i - 1);
+    newArrays.push(arrays[idArrays[choice]]);
+    idArrays.splice(choice, 1);
   }
 
-  return newArray;
+  return newArrays;
 };
 
-const debounce = (callback, timeoutDelay = 500) => {
+const debounce = (callback, timeoutDelay = TIME_DELAY) => {
   let timeoutId;
   return (...rest) => {
     clearTimeout(timeoutId);

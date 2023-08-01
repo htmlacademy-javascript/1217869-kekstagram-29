@@ -1,6 +1,12 @@
 import {sendData} from './data.js';
 import {showSlider, getSettingsSlider} from './slider.js';
 
+const COUNT_HASHTAGS_VALIDATE = 5;
+const COUNT_WORDS_COMMENT_VALIDATE = 140;
+const ZOOM_VALUE_LIMIT = 25;
+const ZOOM_VALUE_LOWER_LIMIT = 25;
+const ZOOM_VALUE_UPPER_LIMIT = 100;
+
 const form = document.querySelector('.img-upload__form');
 const buttonSubmit = document.querySelector('.img-upload__submit');
 const image = document.querySelector('.img-upload__preview img');
@@ -31,7 +37,6 @@ const close = () => {
   slider.noUiSlider.set(1);
 };
 
-//скрытие отображение картинки по клику на пустую область
 const closeImg = document.querySelector('.img-upload__overlay');
 closeImg.addEventListener('click', (evt) => {
   if (document.querySelector('.error') !== null) {
@@ -52,13 +57,11 @@ closeImg.addEventListener('click', (evt) => {
   }
 });
 
-//скрытие отображение картинки по клику на крестик
 const closeButton = document.querySelector('#upload-cancel');
 closeButton.addEventListener('click', () => {
   close();
 });
 
-//скрытие отображения картинки по Esc
 document.addEventListener('keydown', (evt) => {
   const noFocus = (form.querySelector('.text__hashtags') !== document.activeElement) && (form.querySelector('.text__description') !== document.activeElement);
 
@@ -95,7 +98,7 @@ const validateForm = () => {
 
   const validateHashTagCount = (element) => {
     const words = element.split(' ').filter((value) => value !== '').map((value) => value.toLowerCase());
-    return words.length <= 5;
+    return words.length <= COUNT_HASHTAGS_VALIDATE;
   };
 
   const validateHashTagRepeat = (element) => {
@@ -104,7 +107,7 @@ const validateForm = () => {
     return words.length === repeatWords.size;
   };
 
-  const validateComments = (element) => element.length <= 140;
+  const validateComments = (element) => element.length <= COUNT_WORDS_COMMENT_VALIDATE;
 
   pristine.addValidator(form.querySelector('.text__hashtags'), (element) => validateHashTagBlank(element), 'недопустипый хэштег');
   pristine.addValidator(form.querySelector('.text__hashtags'), (element) => validateHashTagCount(element), 'хэштегов больше 5');
@@ -166,7 +169,7 @@ const loadFormImg = () => {
 
   file.addEventListener('change', () => {
     buttonSubmit.disabled = true;
-    //отобразим картинку если jpg png
+
     if (file.files[0].name.endsWith('jpg') || file.files[0].name.endsWith('png')) {
       const changeImg = document.querySelector('.img-upload__overlay');
       changeImg.classList.remove('hidden');
@@ -193,11 +196,11 @@ const scaleImage = () => {
     const digitValue = Number(buttonValue.value.replace('%',''));
     let zoomValue = direction;
 
-    if ((digitValue === 25) && (zoomValue < 0)) {
+    if ((digitValue === ZOOM_VALUE_LOWER_LIMIT) && (zoomValue < 0)) {
       zoomValue = 0;
     }
 
-    if ((digitValue === 100) && (zoomValue > 0)) {
+    if ((digitValue === ZOOM_VALUE_UPPER_LIMIT) && (zoomValue > 0)) {
       zoomValue = 0;
     }
 
@@ -205,8 +208,8 @@ const scaleImage = () => {
     image.style.transform = `scale(${(digitValue + zoomValue) / 100})`;
   };
 
-  buttonSmall.addEventListener('click', () => zoomImg(-25));
-  buttonBig.addEventListener('click', () => zoomImg(25));
+  buttonSmall.addEventListener('click', () => zoomImg(-ZOOM_VALUE_LIMIT));
+  buttonBig.addEventListener('click', () => zoomImg(ZOOM_VALUE_LIMIT));
 };
 
 const changeFilterEffect = () => {
@@ -253,7 +256,6 @@ const changeFilterEffect = () => {
 
   slider.noUiSlider.on('update', () => {
     sliderValue.value = slider.noUiSlider.get();
-    //sliderValue.setAttribute('value', slider.noUiSlider.get());
     setValueEffect();
   });
 

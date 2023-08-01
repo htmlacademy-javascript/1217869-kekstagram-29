@@ -8,10 +8,6 @@ const exchangeData = (response) => {
 const showErrorLoadMessange = () => {
   const error = document.querySelector('#error-load').content.cloneNode(true);
   document.querySelector('.pictures').appendChild(error);
-  const errorButton = document.querySelector('.error__button');
-  errorButton.addEventListener('click', () => {
-    //location.reload();
-  });
 };
 
 const getData = () =>
@@ -20,7 +16,6 @@ const getData = () =>
     .catch(() => {
       showErrorLoadMessange();
       return [];
-      //throw new Error('не смог получить картинки с сервера');
     });
 
 const sendData = (body = null) =>

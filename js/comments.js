@@ -1,10 +1,11 @@
+const ADD_COUNT_COMMENT = 5;
 let photoDefault = {comments:''};
 
 const countAdd = (count) => {
-  const countListComment = Number(document.querySelector('.comments-count').textContent);
+  const countListComment = Number(document.querySelector('.comments-count').innerHTML);
 
-  if (count + 5 < countListComment) {
-    return count + 5;
+  if (count + ADD_COUNT_COMMENT < countListComment) {
+    return count + ADD_COUNT_COMMENT;
   }
 
   document.querySelector('.comments-loader').classList.add('hidden');
@@ -13,12 +14,11 @@ const countAdd = (count) => {
 
 const renderComments = () => {
   const listComments = photoDefault.comments;
-  const countListComments = Number(document.querySelector('.comments-count').textContent);
+  const countListComments = Number(document.querySelector('.comments-count').innerHTML);
   const socialComments = document.querySelector('.social__comments');
   const count = countAdd(socialComments.children.length);
   socialComments.innerHTML = '';
 
-  //заголовок перед комментами
   const countTitle = document.querySelector('.social__comment-count');
   countTitle.innerHTML = `${count} из <span class="comments-count">${countListComments}</span> комментариев`;
 
@@ -36,13 +36,14 @@ const renderComments = () => {
   }
 };
 
+const onCommentsLoaderClick = () => renderComments();
+
 const renderComment = (photo) => {
-  //дозагрузка комментов
   photoDefault = photo;
-  renderComments();
+  onCommentsLoaderClick();
   const loader = document.querySelector('.comments-loader');
-  loader.removeEventListener('click', renderComments);
-  loader.addEventListener('click', renderComments);
+  loader.removeEventListener('click', onCommentsLoaderClick);
+  loader.addEventListener('click', onCommentsLoaderClick);
 };
 
 export {renderComment};
