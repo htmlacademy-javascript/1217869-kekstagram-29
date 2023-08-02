@@ -10,6 +10,16 @@ const ZOOM_VALUE_UPPER_LIMIT = 100;
 const form = document.querySelector('.img-upload__form');
 const buttonSubmit = document.querySelector('.img-upload__submit');
 const image = document.querySelector('.img-upload__preview img');
+const effectChrome = document.querySelector('#effect-chrome');
+const effectSepia = document.querySelector('#effect-sepia');
+const effectMarvin = document.querySelector('#effect-marvin');
+const effectPhobos = document.querySelector('#effect-phobos');
+const effectHeat = document.querySelector('#effect-heat');
+const effectsList = document.querySelector('.effects__list');
+const slider = document.querySelector('.effect-level__slider');
+const sliderValue = document.querySelector('.effect-level__value');
+const fieldSlider = document.querySelector('.img-upload__effect-level');
+const changeImg = document.querySelector('.img-upload__overlay');
 
 const pristine = new Pristine(form, {
   classTo: 'img-upload__field-wrapper',
@@ -19,8 +29,6 @@ const pristine = new Pristine(form, {
 });
 
 const close = () => {
-  const changeImg = document.querySelector('.img-upload__overlay');
-
   if (changeImg.classList.contains('hidden')) {
     return;
   }
@@ -33,39 +41,14 @@ const close = () => {
   image.style.transform = 'scale(1)';
   image.style.filter = 'none';
 
-  const slider = document.querySelector('.effect-level__slider');
+
   slider.noUiSlider.set(1);
 };
 
-const closeImg = document.querySelector('.img-upload__overlay');
-closeImg.addEventListener('click', (evt) => {
-  if (document.querySelector('.error') !== null) {
-    const sectionError = document.querySelector('.error');
-    document.querySelector('.pictures').removeChild(sectionError);
-    return;
-  }
-
-  if (document.querySelector('.success') !== null) {
-    const sectionError = document.querySelector('.success');
-    document.querySelector('.pictures').removeChild(sectionError);
-    close();
-    return;
-  }
-
-  if (evt.target === closeImg) {
-    close();
-  }
-});
-
-const closeButton = document.querySelector('#upload-cancel');
-closeButton.addEventListener('click', () => {
-  close();
-});
-
-document.addEventListener('keydown', (evt) => {
+const onDocumentKeydown = (evt) => {
   const noFocus = (form.querySelector('.text__hashtags') !== document.activeElement) && (form.querySelector('.text__description') !== document.activeElement);
 
-  if (document.querySelector('.error') !== null) {
+  if (evt.key === 'Escape' && document.querySelector('.error') !== null) {
     evt.preventDefault();
     const sectionError = document.querySelector('.error');
     document.querySelector('.pictures').removeChild(sectionError);
@@ -73,11 +56,12 @@ document.addEventListener('keydown', (evt) => {
     return;
   }
 
-  if (document.querySelector('.success') !== null) {
+  if (evt.key === 'Escape' && document.querySelector('.success') !== null) {
     evt.preventDefault();
     const sectionError = document.querySelector('.success');
     document.querySelector('.pictures').removeChild(sectionError);
     close();
+    document.removeEventListener('keydown', onDocumentKeydown);
     return;
   }
 
@@ -85,6 +69,31 @@ document.addEventListener('keydown', (evt) => {
     evt.preventDefault();
     close();
   }
+};
+
+changeImg.addEventListener('click', (evt) => {
+  if (document.querySelector('.error') !== null) {
+    const sectionError = document.querySelector('.error');
+    document.querySelector('.pictures').removeChild(sectionError);
+    return;
+  }
+
+  if (document.querySelector('.success') !== null) {
+    const sectionError = document.querySelector('.success');
+    document.querySelector('.pictures').removeChild(sectionError);
+    close();
+    document.removeEventListener('keydown', onDocumentKeydown);
+    return;
+  }
+
+  if (evt.target === changeImg) {
+    close();
+  }
+});
+
+const closeButton = document.querySelector('#upload-cancel');
+closeButton.addEventListener('click', () => {
+  close();
 });
 
 const validateForm = () => {
@@ -171,11 +180,11 @@ const loadFormImg = () => {
     buttonSubmit.disabled = true;
 
     if (file.files[0].name.endsWith('jpg') || file.files[0].name.endsWith('png')) {
-      const changeImg = document.querySelector('.img-upload__overlay');
       changeImg.classList.remove('hidden');
       document.body.classList.add('modal-open');
 
       buttonSubmit.disabled = false;
+      document.addEventListener('keydown', onDocumentKeydown);
 
       image.src = URL.createObjectURL(file.files[0]);
       const effectImgs = document.querySelectorAll('.effects__preview');
@@ -212,47 +221,37 @@ const scaleImage = () => {
   buttonBig.addEventListener('click', () => zoomImg(ZOOM_VALUE_LIMIT));
 };
 
+const setValueEffect = () => {
+  const value = sliderValue.value;
+
+  fieldSlider.classList.remove('hidden');
+
+  switch (true) {
+    case (effectChrome.checked) :
+      image.style.filter = `grayscale(${value})`;
+      break;
+    case (effectSepia.checked) :
+      image.style.filter = `sepia(${value})`;
+      break;
+    case (effectMarvin.checked) :
+      image.style.filter = `invert(${value})`;
+      break;
+    case (effectPhobos.checked) :
+      image.style.filter = `blur(${value}px)`;
+      break;
+    case (effectHeat.checked) :
+      image.style.filter = `brightness(${value})`;
+      break;
+    default:
+      image.style.filter = 'none';
+      sliderValue.value = 1;
+      fieldSlider.classList.add('hidden');
+      break;
+  }
+};
+
 const changeFilterEffect = () => {
-  const effectChrome = document.querySelector('#effect-chrome');
-  const effectSepia = document.querySelector('#effect-sepia');
-  const effectMarvin = document.querySelector('#effect-marvin');
-  const effectPhobos = document.querySelector('#effect-phobos');
-  const effectHeat = document.querySelector('#effect-heat');
-  const effectsList = document.querySelector('.effects__list');
-  const slider = document.querySelector('.effect-level__slider');
-  const sliderValue = document.querySelector('.effect-level__value');
-  const fieldSlider = document.querySelector('.img-upload__effect-level');
-
   showSlider();
-
-  const setValueEffect = () => {
-    const value = sliderValue.value;
-
-    fieldSlider.classList.remove('hidden');
-
-    switch (true) {
-      case (effectChrome.checked) :
-        image.style.filter = `grayscale(${value})`;
-        break;
-      case (effectSepia.checked) :
-        image.style.filter = `sepia(${value})`;
-        break;
-      case (effectMarvin.checked) :
-        image.style.filter = `invert(${value})`;
-        break;
-      case (effectPhobos.checked) :
-        image.style.filter = `blur(${value}px)`;
-        break;
-      case (effectHeat.checked) :
-        image.style.filter = `brightness(${value})`;
-        break;
-      default:
-        image.style.filter = 'none';
-        sliderValue.value = 1;
-        fieldSlider.classList.add('hidden');
-        break;
-    }
-  };
 
   slider.noUiSlider.on('update', () => {
     sliderValue.value = slider.noUiSlider.get();
@@ -277,4 +276,4 @@ const changeFilterEffect = () => {
   });
 };
 
-export {validateForm, scaleImage, loadFormImg, changeFilterEffect, setOnFormSubmit};
+export {validateForm, scaleImage, loadFormImg, changeFilterEffect, setOnFormSubmit, onDocumentKeydown};

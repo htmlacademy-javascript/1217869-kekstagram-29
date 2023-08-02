@@ -1,6 +1,6 @@
-const getRandomNumber = (left, right) => Math.trunc(Math.random() * (right + 1 - left) + left);
-
 const TIME_DELAY = 500;
+
+const getRandomNumber = (left, right) => Math.trunc(Math.random() * (right + 1 - left) + left);
 
 const getRandomArray = (arrays, count) => {
   const newArrays = [];

@@ -6,17 +6,18 @@ const close = () => {
   if (bigPicture.classList.contains('hidden')) {
     return;
   }
+
   bigPicture.classList.add('hidden');
   document.body.classList.remove('modal-open');
   document.querySelector('.comments-loader').classList.remove('hidden');
 };
 
-document.addEventListener('keydown', (evt) => {
+const onDocumentKeydown = (evt) => {
   if (evt.key === 'Escape') {
     evt.preventDefault();
     close();
   }
-});
+};
 
 const showFullWindowImg = (photo) => {
   bigPicture.classList.remove('hidden');
@@ -31,14 +32,19 @@ const showFullWindowImg = (photo) => {
   const socialComments = document.querySelector('.social__comments');
   socialComments.textContent = '';
   document.body.classList.add('modal-open');
+
+  document.addEventListener('keydown', onDocumentKeydown);
 };
 
-bigPictureClose.addEventListener('click', () => close());
+bigPictureClose.addEventListener('click', () => {
+  close();
+  document.removeEventListener('keydown', onDocumentKeydown);
+});
 
-const closeImg = document.querySelector('.big-picture');
-closeImg.addEventListener('click', (evt) => {
-  if (evt.target === closeImg) {
+bigPicture.addEventListener('click', (evt) => {
+  if (evt.target === bigPicture) {
     close();
+    document.removeEventListener('keydown', onDocumentKeydown);
   }
 });
 

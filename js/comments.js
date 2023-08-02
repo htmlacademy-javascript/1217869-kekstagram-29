@@ -1,4 +1,6 @@
 const ADD_COUNT_COMMENT = 5;
+
+const socialComment = document.querySelector('#social__comment');
 let photoDefault = {comments:''};
 
 const countAdd = (count) => {
@@ -24,14 +26,12 @@ const renderComments = () => {
 
   for (let i = 0; i < count; i++) {
     const comment = listComments[i];
-    const li = document.createElement('li');
-    li.classList.add('social__comment');
-    li.innerHTML = `<img
-        class="social__picture"
-        src=${comment.avatar}
-        alt=${comment.name}
-        width="35" height="35">
-    <p class="social__text">${comment.message}</p>`;
+    const li = socialComment.content.cloneNode(true);
+    const img = li.querySelector('.social__picture');
+    const p = li.querySelector('.social__text');
+    img.src = comment.avatar;
+    img.alt = comment.name;
+    p.textContent = comment.message;
     socialComments.appendChild(li);
   }
 };
